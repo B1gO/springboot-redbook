@@ -23,7 +23,7 @@ public class PostGraphQLController {
     }
 
     @QueryMapping
-    public List<PostDto> getAllPosts(){
+    public List<PostDto> getALlPosts(){
         return this.postService.getAllPost();
     }
 
