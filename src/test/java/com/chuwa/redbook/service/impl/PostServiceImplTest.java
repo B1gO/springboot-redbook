@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.internal.matchers.Any;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,8 +49,11 @@ class PostServiceImplTest {
      * 未定义的方法（behavior），则调用真实的方法。
      * 已定义的方法when().thenReturn(), 则调用mock的虚假behavior。
      */
-    @Spy
-    private ModelMapper modelMapper;
+//    @Spy
+//    private ModelMapper modelMapper;
+
+    @Mock(name="modelMapper")
+    private ModelMapper mockedModelMapper;
 
     /**
      * 为该class依赖的变量，注入对应的Mock对象。
@@ -72,28 +77,43 @@ class PostServiceImplTest {
     @BeforeEach
     void setUp() {
         logger.info("set up Post for each test");
-
         this.post = new Post(1L, "xiao ruishi", "wanqu", "wanqu xiao ruishi",
                 LocalDateTime.now(), LocalDateTime.now());
-        ModelMapper modelMapper = new ModelMapper();
-        this.postDto = modelMapper.map(this.post, PostDto.class);
+        this.postDto = new PostDto();
+        postDto.setId(1L);
+        postDto.setTitle("xiao ruishi");
+        postDto.setContent("wanqu xiao ruishi");
+        postDto.setDescription("wanqu");
     }
 
     @Test
-    public void testCreatePost() {
-        // define the behaviors
-        Mockito.when(postRepositoryMock.save(ArgumentMatchers.any(Post.class)))
-                .thenReturn(post);
-
-        // execute
+    public void testCreatePostWithMockedModelMapper() {
+        // Define modelMapper's two different behaviors (different converting sources and targets)
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(PostDto.class), ArgumentMatchers.eq(Post.class))).thenReturn(post);
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(Post.class), ArgumentMatchers.eq(PostDto.class))).thenReturn(postDto);
+        Mockito.when(postRepositoryMock.save(ArgumentMatchers.any())).thenReturn(post);
         PostDto postResponse = postService.createPost(postDto);
 
         // assertions
-        Assertions.assertNotNull(postResponse);
         Assertions.assertEquals(postDto.getTitle(), postResponse.getTitle());
         Assertions.assertEquals(postDto.getDescription(), postResponse.getDescription());
         Assertions.assertEquals(postDto.getContent(), postResponse.getContent());
     }
+
+//    @Test
+//    public void testCreatePostWithSpiedModelMapper() {
+//        modelMapper = new ModelMapper();
+//
+//        // Although real modelMapper is invoked, behaviors of postRepository still needs to be defined as postRepository is a mocked object
+//        // Mocked objects have skeletons only.
+//        Mockito.when(postRepositoryMock.save(ArgumentMatchers.any())).thenReturn(post);
+//
+//        PostDto postResponse = postService.createPost(postDto);
+//
+//        Assertions.assertEquals(postDto.getTitle(), postResponse.getTitle());
+//        Assertions.assertEquals(postDto.getDescription(), postResponse.getDescription());
+//        Assertions.assertEquals(postDto.getContent(), postResponse.getContent());
+//    }
 
     @Test
     public void testGetAllPost() {
@@ -101,6 +121,8 @@ class PostServiceImplTest {
         posts.add(post);
 
         // define the behaviors
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(Post.class), ArgumentMatchers.eq(PostDto.class))).thenReturn(postDto);
+
         Mockito.when(postRepositoryMock.findAll())
                 .thenReturn(posts);
 
@@ -121,6 +143,7 @@ class PostServiceImplTest {
         // define the behaviors
         Mockito.when(postRepositoryMock.findById(ArgumentMatchers.anyLong()))
                 .thenReturn(Optional.of(post));
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(Post.class), ArgumentMatchers.eq(PostDto.class))).thenReturn(postDto);
 
         // execute
         PostDto postResponse = postService.getPostById(1L);
@@ -161,6 +184,7 @@ class PostServiceImplTest {
         Mockito.when(postRepositoryMock.save(ArgumentMatchers.any(Post.class)))
                 .thenReturn(updatedPost);
 
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(Post.class), ArgumentMatchers.eq(PostDto.class))).thenReturn(postDto);
         // execute
         PostDto postResponse = postService.updatePost(postDto, 1L);
 
@@ -229,6 +253,7 @@ class PostServiceImplTest {
         Mockito.when(pagePosts.getTotalPages()).thenReturn(totalPages);
         Mockito.when(pagePosts.isLast()).thenReturn(isLast);
 
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(Post.class), ArgumentMatchers.eq(PostDto.class))).thenReturn(postDto);
         Mockito.when(postRepositoryMock.findAll(ArgumentMatchers.any(PageRequest.class)))
                 .thenReturn(pagePosts);
 
@@ -277,6 +302,7 @@ class PostServiceImplTest {
 
         Mockito.when(postRepositoryMock.findAll(ArgumentMatchers.any(PageRequest.class)))
                 .thenReturn(pagePosts);
+        Mockito.when(mockedModelMapper.map(ArgumentMatchers.any(Post.class), ArgumentMatchers.eq(PostDto.class))).thenReturn(postDto);
 
         // execute
         PostResponse postResponse = postService.getAllPost(pageNo, pageSize, sortBy, sortDir);
