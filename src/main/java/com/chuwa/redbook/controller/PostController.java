@@ -3,7 +3,10 @@ package com.chuwa.redbook.controller;
 import com.chuwa.redbook.payload.PostDto;
 import com.chuwa.redbook.payload.PostResponse;
 import com.chuwa.redbook.service.PostService;
+import com.chuwa.redbook.service.impl.PostServiceImpl;
 import com.chuwa.redbook.util.AppConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,8 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/posts")
 public class PostController {
+
+    private final Logger logger = LoggerFactory.getLogger(PostServiceImpl.class);
 
     @Autowired
     private PostService postService;
@@ -35,6 +40,9 @@ public class PostController {
             @RequestParam(value = "sortBy", defaultValue = AppConstants.DEFAULT_SORT_BY, required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = AppConstants.DEFAULT_SORT_DIR, required = false) String sortDir
     ) {
+        String msg = "Hello";
+        logger.debug("This is a debug level message, message = {}", msg);
+        logger.error("This is an error level message");
         return postService.getAllPost(pageNo, pageSize, sortBy, sortDir);
     }
 
