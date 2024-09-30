@@ -21,3 +21,7 @@ add @Valid for RequestBody in controller
 
 ## swagger
 
+
+Please insert following records into `user_roles` tables before you sign up.
+`insert into roles (name) values ("ROLE_USER");`
+`insert into roles (name) values ("ROLE_ADMIN");`
