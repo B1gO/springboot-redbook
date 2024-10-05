@@ -34,7 +34,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDto createPost(PostDto postDto) {
-
+        System.out.println("Inside createPost()");
         // covert DTO to Entity
         Post post = modelMapper.map(postDto, Post.class);
 
@@ -54,6 +54,8 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     public List<PostDto> getAllPost() {
+        System.out.println("Inside getAllPost()");
+
         List<Post> posts = postRepository.findAll();
         List<PostDto> postDtos = posts.stream().map(post -> modelMapper.map(post, PostDto.class)).collect(Collectors.toList());
         return postDtos;
@@ -66,6 +68,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     public PostDto getPostById(long id) {
+        System.out.println("Inside getPostById()");
         Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
         return modelMapper.map(post, PostDto.class);
@@ -73,6 +76,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDto updatePost(PostDto postDto, long id) {
+        System.out.println("Inside updatePost()");
+
         //  Question, why do we need to find it out firstly?
         Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         post.setTitle(postDto.getTitle());
@@ -85,6 +90,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePostById(long id) {
+        System.out.println("Inside deletePostById()");
         //  Question, why do we need to find it out firstly?
         Post post = postRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
         postRepository.delete(post);
@@ -92,7 +98,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostResponse getAllPost(int pageNo, int pageSize, String sortBy, String sortDir) {
-
+        System.out.println("Inside getAllPost()");
         Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
@@ -113,5 +119,10 @@ public class PostServiceImpl implements PostService {
         postResponse.setTotalPages(pagePosts.getTotalPages());
         postResponse.setLast(pagePosts.isLast());
         return postResponse;
+    }
+
+    public static String postServiceUtil() {
+        System.out.println("Inside postServiceUtil...");
+        return "postServiceUtil";
     }
 }
