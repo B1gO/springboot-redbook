@@ -38,20 +38,24 @@ public class WebLogAspect {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebLogAspect.class);
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
+//    You can either use @Pointcut("execution(public * com.chuwa.redbook.controller.*.*(..))") with an empty method
+//    or annotate joint points directly with methods.
+//    @Pointcut("execution(public * com.chuwa.redbook.controller.*.*(..))")
+//    public void webLog() {
+//    }
 
-    @Pointcut("execution(public * com.chuwa.redbook.controller.*.*(..))")
-    public void webLog() {
-    }
-
-    @Before("webLog()")
+    @Before("execution(public * com.chuwa.redbook.controller.*.*(..))")
+//    @Before("webLog()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
     }
 
-    @AfterReturning(value = "webLog()", returning = "ret")
+    @AfterReturning(value = "execution(public * com.chuwa.redbook.controller.*.*(..))", returning = "ret")
+//    @Before("webLog()")
     public void doAfterReturning(Object ret) throws Throwable {
     }
 
-    @Around("webLog()")
+    @Around("execution(public * com.chuwa.redbook.controller.*.*(..))")
+//    @Before("webLog()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         //获取当前请求对象
